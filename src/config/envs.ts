@@ -7,6 +7,9 @@ interface EnvVars {
     PRODUCTS_MS_PORT: number;
     ORDERS_MS_HOST: string;
     ORDERS_MS_PORT: number;
+
+    NATS_SERVERS: string[]
+    
 }
 
 const envsSchema = Joi.object({
@@ -16,10 +19,15 @@ const envsSchema = Joi.object({
     ORDERS_MS_HOST: Joi.string().required(),
     ORDERS_MS_PORT: Joi.number().required(),
 
+    NATS_SERVERS: Joi.array().items(Joi.string()).required()
+
 })
 .unknown(true)
 
-const {error, value} = envsSchema.validate(process.env)
+const {error, value} = envsSchema.validate({
+    ...process.env,
+    NATS_SERVERS: process.env.NATS_SERVERS?.split(',')
+})
 
 if(error){
     throw new Error(`Config validation error: ${error.message}`)
@@ -32,5 +40,6 @@ export const envs = {
     productsMsHost: envVars.PRODUCTS_MS_HOST,
     productsMsPort: envVars.PRODUCTS_MS_PORT,
     ordersMsHost: envVars.ORDERS_MS_HOST,
-    ordersMsPort: envVars.ORDERS_MS_PORT
+    ordersMsPort: envVars.ORDERS_MS_PORT,
+    natsServers: envVars.NATS_SERVERS
 }
